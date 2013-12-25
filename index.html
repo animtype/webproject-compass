@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<title>&nbsp;</title>
+<head>
+<style>
+body, html {
+	width: 100%;
+	height: 100%;
+	margin: 0px;
+	padding: 0px;	
+}
+.body_color {
+	background: #474d71;	
+}
+
+#holder {
+	width: 300px;
+	height: 300px;
+	display: block;
+	margin: 10px auto;
+	background-color: #093;
+	position:relative;	
+}
+
+#compass {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	z-index: 1;
+}
+#needle {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	z-index: 10;
+}
+
+</style>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<script src="js/jquery.js"></script>
+        <script src="js/transit.js"></script>
+		<script type="text/javascript" charset="utf-8" src="cordova-2.0.0.js"></script>
+		<script>
+	document.addEventListener("deviceready", onDeviceReady, false); //creates a listener that waits for the deviceready event and then fires onDevice ready function
+
+	function onDeviceReady() { 
+		startCompass(); //runs the startCompass function
+	}
+
+	function startCompass() {
+
+		var options = {
+			frequency : 50 //sets the compass heading to be updated every 50 milliseconds
+		};
+
+
+		navigator.compass.watchHeading(onSuccess, onError, options); //gets the compass heading from device and passes heading to onSuccess function
+	}
+
+	function onSuccess(heading) {//device s magnetic heading is passed to heading variable
+		$("#needle").css({"rotate": heading.magneticHeading});
+	}
+
+	function onError(compassError) { //if there is an error the error will be passed to onError in the compassError variable
+		alert('Compass error: ' + compassError.code); //displays an alert with the error code
+	}
+</script>
+</head>
+<body class="body_color">
+<div id="holder">
+	<img src="compass.jpg" width="300" height="300" id="compass"> 
+	<img src="position.png" width="300" height="300" id="needle">
+</div>
+</body>
+</html>
