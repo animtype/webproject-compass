@@ -7,21 +7,19 @@ body, html {
 	width: 100%;
 	height: 100%;
 	margin: 0px;
-	padding: 0px;	
+	padding: 0px;
 }
 .body_color {
-	background: #474d71;	
+	background: #474d71;
 }
-
 #holder {
 	width: 300px;
 	height: 300px;
 	display: block;
 	margin: 10px auto;
 	background-color: #093;
-	position:relative;	
+	position:relative;
 }
-
 #compass {
 	position: absolute;
 	top: 0px;
@@ -34,64 +32,180 @@ body, html {
 	left: 0px;
 	z-index: 10;
 }
-
 </style>
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<script src="js/jquery.js"></script>
-        <script src="js/transit.js"></script>
-		<script type="text/javascript" charset="utf-8" src="cordova-2.0.0.js"></script>
-		<script>
-	document.addEventListener("deviceready", onDeviceReady, false); //creates a listener that waits for the deviceready event and then fires onDevice ready function
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="js/jquery.js"></script>
+<script src="js/jquery_ui.js"></script>
+<script src="js/jquery_touch.js"></script>
+<script src="js/jquery_plugins.js"></script>
+<script src="js/iscroll.js"></script>
+<script src="js/howler.js"></script>
+<script src="js/transit.js"></script>
+<script src="js/jcanvas.js"></script>
+<script src="js/jhammer.js"></script>
+<script src="app/app_sound.js"></script>
+<script type="text/javascript" charset="utf-8" src="cordova-2.0.0.js"></script>
+<script>
+        document.addEventListener("deviceready", onDeviceReady, false); //creates a listener that waits for the deviceready event and then fires onDevice ready function
 
-	function onDeviceReady() { 
-		startCompass(); //runs the startCompass function
-	}
-
-	function startCompass() {
-
-		var options = {
-			frequency : 50 //sets the compass heading to be updated every 50 milliseconds
+        function onDeviceReady() { 				
+                startCompass(); //runs the startCompass function
+				gogogo();
+        }
+        function startCompass() {
+                var options = {
+                        frequency : 50 //sets the compass heading to be updated every 50 milliseconds
+                };
+                navigator.compass.watchHeading(onSuccess, onError, options); //gets the compass heading from device and passes heading to onSuccess function
+        }
+        function onSuccess(heading) {//device s magnetic heading is passed to heading variable
+                $("#needle").css({"rotate": heading.magneticHeading});
+        }
+        function onError(compassError) { //if there is an error the error will be passed to onError in the compassError variable
+                alert('Compass error: ' + compassError.code); //displays an alert with the error code
+        }        
+        function readLocal () {
+                var my_title = window.localStorage.mytitle;
+                $("#mytitle").html(my_title)                
+        }
+        function saveLocal () {
+                var my_title = $("#storage").val()     
+                window.localStorage.mytitle         = my_title;
+                
+        }
+		function drawLogs (vals) {
+			$('#txts').text($('#txts').text() + "\n" + vals);	
+		}
+		
+		function getPhoneGapPath() {
+			var path = window.location.pathname;
+			path = path.substr( path, path.length - 10 );
+			return 'file://' + path;
 		};
-
-
-		navigator.compass.watchHeading(onSuccess, onError, options); //gets the compass heading from device and passes heading to onSuccess function
-	}
-
-	function onSuccess(heading) {//device s magnetic heading is passed to heading variable
-		$("#needle").css({"rotate": heading.magneticHeading});
-	}
-
-	function onError(compassError) { //if there is an error the error will be passed to onError in the compassError variable
-		alert('Compass error: ' + compassError.code); //displays an alert with the error code
-	}
-	
-	function readLocal () {
-		var my_title = window.localStorage.mytitle;
-		$("#mytitle").html(my_title)
 		
-	}
-	function saveLocal () {
-		var my_title = $("#storage").val()	
+		
+		function gogogo() {	
+		
+			var pathname = getPhoneGapPath()
+			drawLogs (window.location.pathname)	
+			drawLogs (getPhoneGapPath())
+
+		}
+		
+		
+		
+
+
+
+
+
+
+
+
+
+
+ // Audio player
+        //
+        var my_media = null;
+        var mediaTimer = null;
+
+        // Play audio
+        //
+        function playAudio(sun) {
 			
-		window.localStorage.mytitle	 = my_title;
+			var src = $('#snds').val()?$('#snds').val():"sounds/click1.mp3";
+			
+            // Create Media object from src
+            my_media = new Media(src, onSuccess, onError);
+
+            // Play audio
+            my_media.play();
+
+            // Update my_media position every second
+            if (mediaTimer == null) {
+                mediaTimer = setInterval(function() {
+                    // get my_media position
+                    my_media.getCurrentPosition(
+                        // success callback
+                        function(position) {
+                            if (position > -1) {
+                                setAudioPosition((position) + " sec");
+                            }
+                        },
+                        // error callback
+                        function(e) {
+                            console.log("Error getting pos=" + e);
+                            setAudioPosition("Error: " + e);
+                        }
+                    );
+                }, 1000);
+            }
+        }
+
+        // Pause audio
+        // 
+        function pauseAudio() {
+            if (my_media) {
+                my_media.pause();
+            }
+        }
+
+        // Stop audio
+        // 
+        function stopAudio() {
+            if (my_media) {
+                my_media.stop();
+            }
+            clearInterval(mediaTimer);
+            mediaTimer = null;
+        }
+        
+
+        // onError Callback 
+        //
+        function onError(error) {
+            alert('code: '    + error.code    + '\n' + 
+                  'message: ' + error.message + '\n');
+        }
+
+        // Set audio position
+        // 
+        function setAudioPosition(position) {
+            document.getElementById('audio_position').innerHTML = position;
+        }	
 		
-	}
-	
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+        
 </script>
 </head>
 <body class="body_color">
-<div id="holder">
-	<img src="compass.jpg" width="300" height="300" id="compass"> 
-	<img src="position.png" width="300" height="300" id="needle">
-</div>
+<textarea id="txts" style="width: 300px; height: 200px; margin: 0px auto">sounds/click1.mp3</textarea>
 <hr>
 <form style="width: 100%; text-align: center">
-<input type="text" name="storage" id="storage"><br>
-<input type="button" name="add" value="Add to local storage" onclick="saveLocal()">
-<hr>
-<h3>Local Storage: <div id="mytitle"></div></h3>
-<input type="button" name="read" value="Read from local storage" onclick="readLocal()">
+  <input type="text" name="snds" id="snds">
+  <br>
+  <input type="button" name="add" value="Play SOUND" onclick='app.soundTest($("#snds").val())'>
+  <br>
+  <a href="#" class="btn large" onclick="playAudio()">Play Audio</a><br>
+        <a href="#" class="btn large" onclick="pauseAudio();">Pause Playing Audio</a><br>
+        <a href="#" class="btn large" onclick="stopAudio();">Stop Playing Audio</a><br>
+  <p id="audio_position"></p>
+
 </form>
 </body>
 </html>
